@@ -1,7 +1,7 @@
 import {dbWrapper} from "../utils/dbWrapper.js"
 import {ApiError} from "../utils/Apierrors.js"
 import {User} from "../models/user.model.js"
-import {uploadOnCloudinary} from "../utils/cloudnary.js"
+import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 
 const  registerUser = dbWrapper(async (req, res) =>{
@@ -16,14 +16,14 @@ const  registerUser = dbWrapper(async (req, res) =>{
     //return response
 
     const {fullname,email,username,password}=req.body
-    console.log(fullname);
+   
 
     if([fullname,email,username,password].some((filed)=> filed?.trim() === ""))
         {
         throw new ApiError(400,"All fields are required")
     }
 
-   const existedUser = User.findOne({
+   const existedUser = await  User.findOne({
         $or :[{email},{username}]
     })
     if(existedUser){
@@ -31,7 +31,14 @@ const  registerUser = dbWrapper(async (req, res) =>{
     }
 
    const avatarLocalPath =  req.files?.avatar[0]?.path;
-   const coverImageLocalPath  = req.files?.cover[0]?.path;
+//    console.log("this is a req log ",req);
+   
+   
+   
+   let coverImageLocalPath ;
+   if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length >0){
+        coverImageLocalPath  = req.files?.coverImage[0]?.path;
+}
 
    if(!avatarLocalPath){
     throw new ApiError(400,"Avatar file is required")
