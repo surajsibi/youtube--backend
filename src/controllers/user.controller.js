@@ -172,10 +172,14 @@ const logoutUser = dbWrapper(async (req, res) => {
 })
 
 const refreshAccessToken = dbWrapper(async (req, res) => {
-  const incomingRefreshToken = req.cookies.refrshToken || req.body.refreshToken
+  const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+  console.log(incomingRefreshToken);
+  
+  
+  
   if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorized request")
-  }
+  } 
   try {
     const decodedToken = jwt.verify(
       incomingRefreshToken,
@@ -194,14 +198,16 @@ const refreshAccessToken = dbWrapper(async (req, res) => {
       httpOnly: true,
       secure: true
     }
-    const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id)
-    return res.status(200
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
+    console.log(refreshToken);
+    
+    return res.status(200)
       .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("refreshToken", refreshToken, options)
       .json(
-        new ApiResponse(200, { accessToken, newRefreshToken }, "Access token refresh successfully")
+        new ApiResponse(200, { accessToken, refreshToken }, "Access token refresh successfully")
       )
-    )
+    
   } catch (error) {
     throw new ApiError(401, error.message || "invalid refresh token")
   }
@@ -239,9 +245,9 @@ const getCurrentUser = dbWrapper(async (req, res) => {
 })
 
 const updateAccountDetails = dbWrapper(async (req, res) => {
-  const { username, email } = req.body
+  const { fullname, email } = req.body
 
-  if (!username || !email) {
+  if (!fullname || !email) {
     throw new ApiError(400, "all fields are required")
   }
 
@@ -254,7 +260,7 @@ const updateAccountDetails = dbWrapper(async (req, res) => {
       }
     },
     { new: true }
-  ).select("-password")
+  ).select("-password -refreshToken")
 
 
   return res.status(200)
@@ -295,7 +301,7 @@ const updateUserCoverImage = dbWrapper(async (req, res) => {
   if (!coverImageLocalPath) {
     throw new ApiError(400, "cover image file is missing")
   }
-  const coverImage = await uploadOnCloudinary(avatarLocalPath)
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
   if (!coverImage.url) {
     throw new ApiError(400, "error while uploading on cover image")
