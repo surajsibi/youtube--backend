@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs'
+import { ApiError } from './Apierrors.js';
 
 
   cloudinary.config({ 
@@ -29,6 +30,25 @@ import fs from 'fs'
         return null
     }
   }
-  export  {uploadOnCloudinary}
+
+
+  const deleteOnCloudinary = async(public_id,resource_type="image")=>{
+    try {
+      if(!public_id){
+        throw new ApiError(500,"unable to get id")
+        
+      }
+      //delete from cloudinary
+      const result = await cloudinary.uploader.destroy(public_id,{
+        resource_type: resource_type
+      }); 
+      return result;
+    } catch (error) {
+      console.error("Delete from Cloudinary failed:", error);
+      throw new ApiError(500, "Cloudinary deletion failed") 
+    }
+  }
+
+  export  {uploadOnCloudinary,deleteOnCloudinary}
 
   
