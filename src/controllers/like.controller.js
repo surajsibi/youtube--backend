@@ -85,8 +85,8 @@ const getLikedVideos = dbWrapper(async(req, res)=>{
                     {
                         $lookup:{
                         from:"users",
-                        localField:"_id",
-                        foreignField:"owner",
+                        localField:"owner",
+                        foreignField:"_id",
                         as:"ownerDetail"
                     }
                     },
@@ -106,7 +106,7 @@ const getLikedVideos = dbWrapper(async(req, res)=>{
         },
         {
             $project:{
-                _id:0,
+                _id:1,
                 likedVideos:{
                     _id:1,
                     "videoFile.url":1,
@@ -127,18 +127,19 @@ const getLikedVideos = dbWrapper(async(req, res)=>{
         }
     ])
 
-    if(!like){
-        throw new ApiError(400,"can not find video")
-        .json(
-            new ApiResponse(
-                200,
-                likedVideosAggegate,
-                "liked videos fetched successfully"
-            )
-        )
-    }
+    if (!like?.length) {
+        throw new ApiError(400, "like does not exist ")
+      }
 
     return res.status(200)
+    .json(
+        new ApiResponse(
+            200,
+            like[0],
+            "liked videos fetched successfully"
+        )
+    )
+    
 
 })
 
