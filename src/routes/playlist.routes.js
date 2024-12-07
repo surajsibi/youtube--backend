@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.middleware.js    ";
-import { upload } from "../middlewares/multer.middlewares.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+
 import {
     createPlaylist,
     updatePlaylist,
