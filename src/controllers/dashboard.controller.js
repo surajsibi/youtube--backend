@@ -58,10 +58,10 @@ const getChannelStats = dbWrapper(async(req,res)=>{
                     $sum:"$totalLikes",
                 },
                 totalVideos:{
-                    $sum:"$totalVideos"
+                    $sum:1
                 },
                 totalViews:{
-                    $sum:1
+                    $sum:"$totalViews"
                 }
             }
         }
